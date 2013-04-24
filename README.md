@@ -57,6 +57,7 @@ Here are some important points:
 * Example "stream" configuration section:
 
 <code>
+
 	stream:	
 	  - ID 	  : 1
 	    Name  : Facebook Keyword Search  
