@@ -117,14 +117,14 @@ class EDC_Client
         id = ""
         posted_time = ""
         body = ""
-        tags = "" #Array.new
-        value = Array.new
+        tags = Array.new
+        values = Array.new
 
         node = docXML.root
 
         #Grab this activity content
         content = node.to_s
-        p content
+        #p content
 
         #Storing as a file?  Then we are writing the entire activity payload with no need to parse out details.
         if @storage == "files" then #Write to the file.
@@ -140,6 +140,7 @@ class EDC_Client
 
                 begin
                     new_file.write(content)
+                    p "Writing #{filename}"
                 rescue
                     p "Error writing file: #{filename}"
                 end
@@ -156,22 +157,14 @@ class EDC_Client
                 end
 
                 if sub_node.name == "matching_rules" then
-                    tag = Array.new
-                    value = Array.new
                     sub_node.children.each do |rules_node|
-                        #p rules_node.name
-
-                        value << rules_node.inner_text if rules_node.name == "matching_rule"
-
-                        #TODO: add tags to ruleset and re-test
-                        #tags = docXML.xpath("//*[tag]")
-                        tags = ""
-                        #p tags
+                        values << rules_node.inner_text if rules_node.name == "matching_rule"
+                        tags << rules_node.attr('tag') if rules_node.name == "matching_rule" unless tags.include?(rules_node.attr('tag'))
                     end
                 end
             end
 
-            @datastore.storeActivityData(id, posted_time, content, body, @publisher, value, tags)
+            @datastore.storeActivityData(id, posted_time, content, body, @publisher, values, tags)
         end
     end
 
@@ -201,7 +194,7 @@ class EDC_Client
         activities = Array.new #Activity array of what we are cleaning up, passing on for processing.
 
         @data = @data + data  #Add the incoming buffer data to our managed data string.
-        p "length of data: #{@data.length}"
+        #p "length of data: #{@data.length}"
 
         #loop until we no longer have a full activity to work on.
         #A full activity is defined by matching <entry> tags.
@@ -214,7 +207,7 @@ class EDC_Client
             if fullActivity then
                 #Consume first activity.
                 activity = @data[@data.index(ACT_OPEN)..(@data.index(ACT_CLOSE) + ACT_CLOSE.length)-1]
-                p activity
+                #p activity
 
                 #Insert into activities array to be further processed.
                 activities << activity
@@ -224,7 +217,7 @@ class EDC_Client
             end
         end
 
-        p "length of data: #{@data.length}"
+        #p "length of data: #{@data.length}"
 
         activities.each do |activity|
             #p activity
@@ -238,12 +231,10 @@ class EDC_Client
     '''
     def streamData
 
-        p @stream[0]["ID"]
-
-        activity = ""
-
+        #Build streaming end-point.
         url = "https://#{@machine_name}.gnip.com/data_collectors/#{@stream[0]["ID"]}/stream.xml"
 
+        #Create streaming HTTP connection, and start streaming data...
         Curl::Easy.http_get url do |c|
             c.http_auth_types = :basic
             c.username = @user_name
@@ -254,13 +245,8 @@ class EDC_Client
 
             c.on_body do |data|
                 if data.length > 1 then
-
-                    #p "-------------------"
-                    p data
-                    #p "-------------------"
-
+                    #p data
                     handleData(data)
-
                 else
                     p "Received heartbeat @ #{Time.now}.  data = #{data}"
                 end
@@ -452,8 +438,6 @@ class PtDatabase
 
         content = handleSpecialCharacters(content)
         body = handleSpecialCharacters(body)
-
-        #TODO: native_id needs to be a string...
 
         #Build SQL.
         sql = "REPLACE INTO activities (native_id, posted_at, content, body, rule_value, rule_tag, publisher, created_at, updated_at ) " +
