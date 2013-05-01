@@ -71,8 +71,6 @@ class EDC_Client
         #EDC configuration details.
         @storage = config["edc"]["storage"]
         @out_box = config["edc"]["out_box"]
-        @poll_interval = config["edc"]["poll_interval"]
-        @poll_max = config["edc"]["poll_max"]
 
         if @storage == "database" then #Get database connection details...
             db_host = config["database"]["host"]
@@ -392,14 +390,13 @@ class PtDatabase
         end
     end
 
-    #NativeID is defined as an integer.  This works for Twitter, but not for other publishers who use alphanumerics.
     #Tweet "id" field has this form: "tag:search.twitter.com,2005:198308769506136064"
     #This function parses out the numeric ID at end.
     def getTwitterNativeID(id)
         native_id = Integer(id.split(":")[-1])
     end
 
-    #Twitter uses UTC.
+    #Most publishers use UTC. Thankfully!
     def getPostedTime(time_stamp)
         time_stamp = Time.parse(time_stamp).strftime("%Y-%m-%d %H:%M:%S")
     end
@@ -420,9 +417,7 @@ class PtDatabase
 
     '''
     storeActivity
-    Receives an Activity Stream data point formatted in JSON.
-    Does some (hopefully) quick parsing of payload.
-    Writes to an Activities table.
+    Receives an Activity Stream data. Writes to an Activities table.
 
     t.string   "native_id"
     t.text     "content"
@@ -431,7 +426,7 @@ class PtDatabase
     t.string   "rule_tag"
     t.string   "publisher"
     t.string   "job_uuid"  #Used for Historical PowerTrack.
-    t.datetime "posted_time"
+    t.datetime "posted_at"
     '''
 
     def storeActivityData(native_id, posted_at, content, body, publisher, rule_values, rule_tags)
