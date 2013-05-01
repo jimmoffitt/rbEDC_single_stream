@@ -1,7 +1,7 @@
 Introduction
 ============
 
-This is a Ruby script written to stream data from a Enterprise Data Collector (EDC).  This version can stream from a single EDC data feed and is based on CURL, as implemented by the Curl::Easy gem (curb).  (There will also be example code for streaming from multiple streams, based on event-machine, in the near future).
+This is a Ruby script written to stream data from a Enterprise Data Collector (EDC).  This version can stream from a single EDC data feed and is based on CURL, as implemented by the Curl::Easy gem (curb).  If you are interested in managing multiple, concurrent EDC streams, see the project at https://github.com/jimmoffitt/rbEDC_multi_stream.
 
 The target EDC data stream can be configured in a script configuration file. If you want to use this script to stream from more than one stream at a time, in theory, multiple instances opt this code could be ran (with different configuration files passed in).  
 
