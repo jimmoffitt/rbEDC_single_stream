@@ -179,7 +179,8 @@ class EDC_Client
     end
 
     #Streamed data are directed to here...
-    #Several cases to handle for @data
+    #This method monitors the @data structure, looks for complete activities and send them off for processing.
+    #Several cases to handle for @data:
     #<entry @@@@@@@@@@@@@@ </entry>
     #<entry @@@@@@@@@@@@@@@@@@@@@@@
     #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
